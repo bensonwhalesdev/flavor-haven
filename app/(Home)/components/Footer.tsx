@@ -10,8 +10,8 @@ const Footer = () => {
         {/* BRAND */}
         <div className="space-y-4 animate-fadeIn">
           <div className="flex items-center gap-3">
-            <Image src="/logo.jpg" width={45} height={45} alt="logo" className="rounded-md" />
-            <h2 className="text-2xl font-bold text-[#CF470C]">Flavor Haven</h2>
+            <Image src="/logoo.jpg" width={45} height={45} alt="logo" className="rounded-md" />
+            <h2 className="text-2xl font-bold text-[#CF470C]">Thebomma Gourmet</h2>
           </div>
           <p className="text-gray-600 text-sm leading-relaxed max-w-xs">
             Discover, create and share delicious recipes from around the world.
@@ -74,7 +74,7 @@ const Footer = () => {
 
       {/* COPYRIGHT */}
       <div className="text-center text-gray-600 text-sm mt-12 pt-6 border-t border-[#f3cbb3]">
-        © {new Date().getFullYear()} Flavor Haven. All rights reserved.
+        © {new Date().getFullYear()} Thebomma_gourmet. All rights reserved.
       </div>
     </footer>
   );

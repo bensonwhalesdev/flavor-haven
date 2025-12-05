@@ -34,7 +34,7 @@ const HeroSection = () => {
 
         {/* Title */}
         <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-lg mb-6 leading-tight">
-          Flavor Haven Vault
+          Thebomma Gourmet
         </h1>
 
         {/* Subtext */}

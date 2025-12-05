@@ -8,7 +8,7 @@ const WhyChoose = () => {
       {/* Heading */}
       <div className="text-center max-w-2xl mx-auto px-4">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-          Why Choose Flavor Haven?
+          Why Choose Thebomma Gourmet?
         </h1>
         <p className="mt-3 text-gray-600 text-lg">
           Everything you need to discover, create, and share amazing recipes

@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Flavor Haven",
+  title: "Thebomma Gourmet",
   description: "Your Vault for all recipes",
 };
 

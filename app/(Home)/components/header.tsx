@@ -17,14 +17,14 @@ const Header = () => {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo.jpg"
+            src="/logoo.jpg"
             alt="logo"
             width={45}
             height={45}
             className="rounded-md cursor-pointer"
           />
           <h1 className="text-xl font-semibold text-[#CF470C] tracking-wide">
-            Flavor Haven
+            Thebomma_gourmet
           </h1>
         </Link>
 
