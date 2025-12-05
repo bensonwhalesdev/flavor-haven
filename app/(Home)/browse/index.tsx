@@ -43,7 +43,6 @@ const GET_RECIPES = gql`
   }
 `;
 
-// --- Types (Kept the same) ---
 type Recipe = {
   id: string;
   title: string;
@@ -58,6 +57,29 @@ type RecipesQueryResult = {
   recipes: Recipe[];
 };
 
+// --- UTILITY FUNCTION: Fisher-Yates Shuffle Algorithm ---
+const shuffleArray = <T extends any[]>(array: T): T => {
+  // Create a mutable copy to prevent modifying the Apollo Client cache's original data
+  const shuffledArray = [...array] as T;
+  let currentIndex = shuffledArray.length;
+  let randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex !== 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [shuffledArray[currentIndex], shuffledArray[randomIndex]] = [
+      shuffledArray[randomIndex],
+      shuffledArray[currentIndex],
+    ];
+  }
+
+  return shuffledArray;
+};
+
 // --- Component ---
 
 export default function BrowsePage() {
@@ -69,11 +91,19 @@ export default function BrowsePage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const allRecipes = data?.recipes || [];
-  const cuisinesWithAll = ["", ...CUISINES]; 
+  const cuisinesWithAll = ["", ...CUISINES];
 
-  // 1. Filtering and Searching Logic (Memoized for performance)
+  // 1. SHUFFLED RECIPES: This memoized value shuffles the full list of recipes.
+  // It only re-shuffles when 'data' changes (i.e., on initial fetch or a full page refresh).
+  const shuffledRecipes = useMemo(() => {
+    if (allRecipes.length === 0) return [];
+    return shuffleArray(allRecipes);
+  }, [allRecipes]);
+
+
+  // 2. Filtering and Searching Logic (Now operates on the shuffled list)
   const filteredRecipes = useMemo(() => {
-    let currentRecipes = allRecipes;
+    let currentRecipes = shuffledRecipes; // START with the shuffled list
 
     // Filter by Cuisine
     if (cuisineFilter) {
@@ -92,22 +122,23 @@ export default function BrowsePage() {
           (recipe.cuisine?.toLowerCase().includes(lowerQuery))
       );
     }
-    
+
     // Reset page to 1 if the filter/search criteria change the result set
+    // NOTE: Added currentPage to the dependency array to ensure this logic works correctly
     if (currentPage > 1 && currentRecipes.length <= (currentPage - 1) * RECIPES_PER_PAGE) {
-        setCurrentPage(1);
+      setCurrentPage(1);
     }
-    
+
     return currentRecipes;
-  }, [allRecipes, cuisineFilter, searchQuery]);
+  }, [shuffledRecipes, cuisineFilter, searchQuery, currentPage]); // Updated dependencies
 
 
-  // 2. Pagination Logic (Slicing the Filtered Data)
+  // 3. Pagination Logic (Slicing the Filtered Data)
   const totalRecipes = filteredRecipes.length;
   const totalPages = Math.ceil(totalRecipes / RECIPES_PER_PAGE);
   const startIndex = (currentPage - 1) * RECIPES_PER_PAGE;
   const endIndex = startIndex + RECIPES_PER_PAGE;
-  
+
   const displayedRecipes = filteredRecipes.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage: number) => {
@@ -121,7 +152,7 @@ export default function BrowsePage() {
   return (
     <div className="min-h-screen px-4 sm:px-6 py-12">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* Title and Description */}
         <h1 className="text-4xl font-extrabold text-[#CF470C] mb-2">
           Discover Recipes
@@ -132,7 +163,7 @@ export default function BrowsePage() {
 
         {/* --- Search and Filter Bar --- */}
         <div className="flex flex-col md:flex-row gap-4 mb-12 p-4 bg-white rounded-xl shadow-lg border border-gray-200">
-          
+
           {/* Search Input */}
           <div className="relative flex-1">
             <IoSearch size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -147,7 +178,7 @@ export default function BrowsePage() {
               className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#CF470C] focus:border-transparent transition-colors"
             />
           </div>
-          
+
           {/* Cuisine Select */}
           <select
             value={cuisineFilter}
@@ -166,15 +197,15 @@ export default function BrowsePage() {
 
           {/* Share Recipe Button (Placeholder) */}
           <Link href={'/share'}>
-          <button className="flex items-center justify-center gap-2 px-6 py-3 bg-[#CF470C] text-white rounded-lg font-semibold hover:bg-[#b93f0b] transition duration-150 shadow-md md:w-auto">
-            <LuChefHat size={20} /> Share Recipe
-          </button>
+            <button className="flex items-center justify-center gap-2 px-6 py-3 bg-[#CF470C] text-white rounded-lg font-semibold hover:bg-[#b93f0b] transition duration-150 shadow-md md:w-auto">
+              <LuChefHat size={20} /> Share Recipe
+            </button>
           </Link>
         </div>
 
         {/* --- Recipe Grid --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          
+
           {/* Loading Skeletons */}
           {loading &&
             [...Array(RECIPES_PER_PAGE)].map((_, i) => (
