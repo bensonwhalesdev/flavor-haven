@@ -44,6 +44,16 @@ export const typeDefs = gql`
     updatedAt: String!
   }
 
+  #------Paginated Response Type ---
+  type PaginatedRecipes {
+    recipes: [Recipe!]!
+    totalCount: Int!
+    currentPage: Int!
+    pageSize: Int!
+    totalPages: Int!
+  }
+  # ------------------------------------
+
   type AuthPayload {
     user: User!
     token: String!
@@ -80,7 +90,13 @@ export const typeDefs = gql`
   # Queries
   # ----------------------------
   type Query {
-    recipes(search: String, cuisine: String): [Recipe!]!
+    recipes(
+      search: String
+      cuisine: String
+      page: Int
+      pageSize: Int
+    ): PaginatedRecipes!
+    
     recipe(id: ID!): Recipe
     userRecipes(userId: ID!): [Recipe!]!
     users: [User!]!

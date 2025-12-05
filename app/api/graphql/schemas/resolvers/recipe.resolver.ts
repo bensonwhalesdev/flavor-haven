@@ -1,13 +1,16 @@
 import RecipeModel from "@/app/api/models/recipe.model";
 import { connectDB } from "@/app/utils/connectdb";
 
+const RECIPES_PER_PAGE = 6;
+
 export const recipeResolvers = {
   Query: {
-    recipes: async (_: any, { search, cuisine }: any) => {
+    recipes: async ( _: any, {search, cuisine,page = 1, pageSize = RECIPES_PER_PAGE,}: {
+        search?: string; cuisine?: string; page?: number; pageSize?: number;} ) => {
       try {
         await connectDB();
         const query: any = {};
-
+        
         if (search) {
           query.$or = [
             { title: { $regex: search, $options: "i" } },
@@ -18,12 +21,32 @@ export const recipeResolvers = {
 
         if (cuisine) query.cuisine = cuisine;
 
-        return await RecipeModel.find(query)
+        // 2. Get the total count of recipes matching the filter
+        const totalCount = await RecipeModel.countDocuments(query);
+
+        // 3. Calculate skip/offset for pagination
+        const limit = pageSize;
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * limit;
+
+        // 4. Fetch the paginated recipes
+        const recipes = await RecipeModel.find(query)
+          .skip(Math.max(0, skip)) // Ensure skip is non-negative
+          .limit(limit)
           .populate("author")
           .populate("likes")
           .populate("comments.user");
+
+        // 5. Return the results in a structured object
+        return {
+          recipes,
+          totalCount,
+          currentPage: page,
+          pageSize: limit,
+          totalPages: Math.ceil(totalCount / limit),
+        };
       } catch (error: any) {
-        throw new Error(error.message || "Failed to fetch recipes");
+        throw new Error(error.message || "Failed to fetch paginated recipes");
       }
     },
 
@@ -53,9 +76,6 @@ export const recipeResolvers = {
   },
 
   Mutation: {
-    // ============================================
-    // CREATE RECIPE (AUTH REQUIRED)
-    // ============================================
     createRecipe: async (_: any, { input }: any, context: any) => {
       try {
         await connectDB();
@@ -72,16 +92,16 @@ export const recipeResolvers = {
         console.error("Error creating recipe:", error);
         throw new Error(error.message || "Failed to create recipe");
       }
-    }, 
+    },
 
     toggleLike: async (_: any, { recipeId }: any, context: any) => {
       try {
         await connectDB();
 
         const recipe = await RecipeModel.findById(recipeId);
-        if (!recipe) throw new Error("Recipe not found"); 
+        if (!recipe) throw new Error("Recipe not found");
 
-        const userId = context.user?.id || null; 
+        const userId = context.user?.id || null;
 
         if (!userId) {
           throw new Error("You must be logged in to like a recipe.");
@@ -125,7 +145,7 @@ export const recipeResolvers = {
 
         const populatedRecipe = await RecipeModel.findById(recipeId).populate({
           path: `comments.${lastCommentIndex}.user`,
-          model: "User", 
+          model: "User",
         });
 
         return populatedRecipe.comments[lastCommentIndex];
