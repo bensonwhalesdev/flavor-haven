@@ -65,7 +65,6 @@ const Header = () => {
                 onClick={logout}
                 className="px-4 py-2 bg-[#CF470C] text-white rounded-md flex items-center gap-2 hover:bg-[#b93f0b] cursor-pointer transition"
               >
-                <FaSignOutAlt size={16} />
                 Sign Out
               </button>
             </div>
@@ -135,7 +134,6 @@ const Header = () => {
                 onClick={logout}
                 className="w-full flex items-center gap-3 py-2 px-2 rounded-md bg-[#CF470C] text-white hover:bg-[#b93f0b] transition"
               >
-                <FaSignOutAlt size={18} />
                 Sign Out
               </button>
             </>

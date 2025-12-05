@@ -69,7 +69,7 @@ export default function BrowsePage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const allRecipes = data?.recipes || [];
-  const cuisinesWithAll = ["", ...CUISINES]; // Add an empty option for "All"
+  const cuisinesWithAll = ["", ...CUISINES]; 
 
   // 1. Filtering and Searching Logic (Memoized for performance)
   const filteredRecipes = useMemo(() => {
